@@ -90,7 +90,7 @@ if args.forecast or args.tenday:
     for x in weather['forecast']['txt_forecast']['forecastday']:
         print u"\t%s" % x['title']
         if args.imperial:
-            print u"\t %s" % x['fctext']
+            print u"\t %s" % x['fcttext']
         else:
             print u"\t  %s" % x['fcttext_metric']
 if args.alerts:
