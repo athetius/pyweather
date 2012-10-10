@@ -59,7 +59,11 @@ if args.tenday:
 response = urllib2.urlopen('http://api.wunderground.com/api/' + apikey + features + '/q/'+ query +'.json')
 weather = json.loads(response.read())
 response.close()
-conditions = weather['current_observation']
+try:
+    conditions = weather['current_observation']
+except:
+    print u"Cannot find %s" % query
+    exit(0)
 print u"City: %s" % conditions['display_location']['full']
 print conditions['observation_time']
 print u"Current Conditions:"
