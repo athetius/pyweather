@@ -65,9 +65,9 @@ if args.imperial:
 else:
     print u"\tTemp: %s\xb0C" % conditions['temp_c']
 if args.imperial:
-    print u"\tFeels Like: %s°F" % conditions['feelslike_f']
+    print u"\tFeels Like: %s\xb0F" % conditions['feelslike_f']
 else:
-    print u"\tFeels Like: %s°C" % conditions['feelslike_c']
+    print u"\tFeels Like: %s\xb0C" % conditions['feelslike_c']
 if args.imperial:
     print u"\tWind: %s %smph gusts at %smph" % (conditions['wind_dir'], conditions['wind_mph'], conditions['wind_gust_mph'])
 else:
