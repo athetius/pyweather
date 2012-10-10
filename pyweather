@@ -1,0 +1,106 @@
+#!/usr/bin/env python2.7
+# vim: set fileencoding=utf-8 :
+# Copyright 2012 John Hutchison<heimdal@athetius.com> (pubkey at athetius.com/public.key)
+#   GPG Key fingerprint = 348C 01B9 84B7 6346 0257  4376 7044 89A4 5860 FA16
+##   This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import urllib2
+import json
+import argparse
+# globals (yes, globals)
+apikey = '' #Please put api key here
+features = '/conditions'
+# Starting the arg parse
+parser = argparse.ArgumentParser(description='Python weather script using Weather Underground API\nIf no args,will use autoip dectection, always shows current conditions')
+parser.add_argument('-i', '--imperial', help="Set units to imperial", action="store_true", default=False)
+parser.add_argument('-f', '--forecast', help="Display forecast for 3 days", action="store_true", default=False)
+parser.add_argument('-t', '--tenday', help="Display forecast for 10 days", action="store_true", default=False)
+parser.add_argument('-a', '--alerts', help="Display any alerts", action="store_true", default=False)
+parser.add_argument('zipcode', nargs='?', help="United States Postal Code")
+parser.add_argument('-c', '--city', nargs=2, help="City/State or City/Country", action='store', metavar='query')
+parser.add_argument('-p', '--airplane', nargs=1, help="Airport Code (example KJFK)", metavar='Code')
+parser.add_argument('-l', '--coordinates', nargs=2, help="Latitude then Longitude", metavar='coord')
+parser.add_argument('--sarah', help=argparse.SUPPRESS)
+args = parser.parse_args()
+# Setting up the arguments
+# Set's up the query
+if args.zipcode:
+    query = args.zipcode
+elif args.city:
+    query = args.city[1] + '/' + args.city[0]
+elif args.airplane:
+    query = args.airplane
+elif args.coordinates:
+    query = args.coordinates[0] + ',' + args.coordinates[1]
+else: #If they don't enter anything then just try to get location with ip address
+    query = 'autoip'
+#adding sections to the request
+if args.forecast:
+    features = features + '/forecast'
+if args.alerts:
+    features = features + '/alerts'
+if args.tenday:
+    features = features + '/forecast10day'
+# The 'main' function
+response = urllib2.urlopen('http://api.wunderground.com/api/' + apikey + features + '/q/'+ query +'.json')
+weather = json.loads(response.read())
+response.close()
+conditions = weather['current_observation']
+print u"City: %s" % conditions['display_location']['full']
+print conditions['observation_time']
+print u"Current Conditions:"
+print u"\tWeather: %s" % conditions['weather']
+if args.imperial:
+    print u"\tTemp: %s\xb0F" % conditions['temp_f']
+else:
+    print u"\tTemp: %s\xb0C" % conditions['temp_c']
+if args.imperial:
+    print u"\tFeels Like: %s°F" % conditions['feelslike_f']
+else:
+    print u"\tFeels Like: %s°C" % conditions['feelslike_c']
+if args.imperial:
+    print u"\tWind: %s %smph gusts at %smph" % (conditions['wind_dir'], conditions['wind_mph'], conditions['wind_gust_mph'])
+else:
+    print u"\tWind: %s %skph gusts at %skph" % (conditions['wind_dir'], conditions['wind_kph'], conditions['wind_gust_kph'])
+print u"\tPressure: %smb %s" % (conditions['pressure_mb'], conditions['pressure_trend'])
+if args.imperial:
+    print u"\tVisibility: %smi" % conditions['visibility_mi']
+else:
+    print u"\tVisibility: %skm" % conditions['visibility_km']
+if args.forecast or args.tenday:
+    print u"Forecast:"
+    for x in weather['forecast']['txt_forecast']['forecastday']:
+        print u"\t%s" % x['title']
+        if args.imperial:
+            print u"\t %s" % x['fctext']
+        else:
+            print u"\t  %s" % x['fcttext_metric']
+if args.alerts:
+    if weather['alerts']:
+        print u"Alerts:"
+        #First we are going to try and see if the alarms are in Europe or in the United States
+        try:
+            for x in weather['alerts']:
+                print u"\tDescription: %s" % x['wtype_meteoalarm_name']
+                print u"\tMeteoalarm level: %s" % x['level_meteoalarm_name']
+                print u"\tIssued: %s" % x['date']
+                print u"\t  %s" % x['level_meteoalarm_description']
+                print u"\tAttribution: %s" % x['attribution']
+        except:
+            for x in weather['alerts']:
+                print u"\tDescription: %s" % x['description']
+                print u"\tIssued: %s" % x['date']
+                print u"\tExpires: %s" % x['expires']
+                print u"\t  %s" % x['message']
+    else:
+        print u"No Alerts! :D"
