@@ -17,6 +17,7 @@
 import urllib2
 import json
 import argparse
+from sys import exit
 # globals (yes, globals)
 apikey = '' #Please put api key here
 features = '/conditions'
@@ -30,7 +31,7 @@ parser.add_argument('zipcode', nargs='?', help="United States Postal Code")
 parser.add_argument('-c', '--city', nargs=2, help="City/State or City/Country", action='store', metavar='query')
 parser.add_argument('-p', '--airplane', nargs=1, help="Airport Code (example KJFK)", metavar='Code')
 parser.add_argument('-l', '--coordinates', nargs=2, help="Latitude then Longitude", metavar='coord')
-parser.add_argument('--sarah', help=argparse.SUPPRESS)
+parser.add_argument('--sarah', help=argparse.SUPPRESS, action="store_true", default=False)
 args = parser.parse_args()
 # Setting up the arguments
 # Set's up the query
@@ -44,6 +45,9 @@ elif args.coordinates:
     query = args.coordinates[0] + ',' + args.coordinates[1]
 else: #If they don't enter anything then just try to get location with ip address
     query = 'autoip'
+if args.sarah:
+    print u"You have invoked the power of Princess Sarah\nEverywhere is sunny: Rejoice!"
+    exit(0)
 #adding sections to the request
 if args.forecast:
     features = features + '/forecast'
